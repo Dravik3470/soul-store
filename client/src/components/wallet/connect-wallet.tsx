@@ -12,12 +12,32 @@ const ConnectWallet = () => {
   const handleConnect = async () => {
     try {
       // Connect to NEAR wallet
+      console.log("Starting wallet connection...");
+      
+      // Check if connectNearWallet function is available
+      if (typeof connectNearWallet !== 'function') {
+        console.error("NEAR wallet connection function not found");
+        toast({
+          title: "Connection Error",
+          description: "Wallet connection method not available",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const walletInfo = await connectNearWallet();
+      console.log("Wallet connection result:", walletInfo);
       
       if (walletInfo) {
         // Pass wallet info to login function
+        console.log("Attempting login with wallet:", walletInfo.walletId);
         await login(walletInfo.walletId, walletInfo.publicAddress);
+        toast({
+          title: "Connected",
+          description: `Successfully connected to ${walletInfo.walletId}`,
+        });
       } else {
+        console.error("Wallet connection returned null");
         toast({
           title: "Connection failed",
           description: "Unable to connect to NEAR wallet",

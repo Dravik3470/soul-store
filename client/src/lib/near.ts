@@ -16,6 +16,9 @@ export function initNearWallet() {
   
   // For this demo, we'll expose a global function that simulates wallet connection
   window.connectNearWallet = connectNearWallet;
+  
+  // For debugging purposes, log if the function was properly assigned
+  console.log("NEAR wallet connection initialized: ", typeof window.connectNearWallet === 'function' ? 'Success' : 'Failed');
 }
 
 // Function to simulate wallet connection
@@ -28,20 +31,17 @@ export async function connectNearWallet(): Promise<NearWalletInfo | null> {
     // In a real implementation, this would redirect to NEAR wallet
     // and handle the callback with account information
     
-    // For demo, we'll just create a simulated wallet
-    const testWallets = [
-      { walletId: 'alex.near', publicAddress: '0x71c7656ec7ab88b098defb751b7401b5f6d8976f' },
-      { walletId: 'maria.near', publicAddress: '0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e' },
-      { walletId: 'demo.near', publicAddress: '0x2191ef87e392377ec08e7c08eb105ef5448eced5' }
-    ];
-    
-    // Randomly select one of the test wallets
-    const randomWallet = testWallets[Math.floor(Math.random() * testWallets.length)];
+    // For demo, we'll always use the demo wallet for consistent testing
+    const wallet = { 
+      walletId: 'demo.near', 
+      publicAddress: '0x2191ef87e392377ec08e7c08eb105ef5448eced5' 
+    };
     
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    return randomWallet;
+    console.log("Successfully connected to wallet:", wallet.walletId);
+    return wallet;
   } catch (error) {
     console.error("Error connecting to NEAR wallet:", error);
     return null;

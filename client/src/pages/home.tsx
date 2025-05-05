@@ -8,12 +8,27 @@ const Home: React.FC = () => {
   const { isAuthenticated, login } = useContext(AuthContext);
 
   const handleConnectWallet = async () => {
-    // Connect to NEAR wallet
-    if (window.connectNearWallet) {
-      const walletInfo = await window.connectNearWallet();
-      if (walletInfo) {
-        await login(walletInfo.walletId, walletInfo.publicAddress);
+    try {
+      // Connect to NEAR wallet
+      console.log("Home page: Starting wallet connection...");
+      
+      if (typeof window.connectNearWallet !== 'function') {
+        console.error("Home page: NEAR wallet function not available");
+        return;
       }
+      
+      const walletInfo = await window.connectNearWallet();
+      console.log("Home page: Wallet connection result:", walletInfo);
+      
+      if (walletInfo) {
+        console.log("Home page: Attempting login with wallet:", walletInfo.walletId);
+        await login(walletInfo.walletId, walletInfo.publicAddress);
+        console.log("Home page: Login successful");
+      } else {
+        console.error("Home page: Failed to connect wallet");
+      }
+    } catch (error) {
+      console.error("Home page: Wallet connection error:", error);
     }
   };
 
