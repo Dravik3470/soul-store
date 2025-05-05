@@ -89,8 +89,10 @@ function App() {
   
   const login = async (nearWallet: string, nearAddress: string) => {
     try {
+      console.log("Sending login request to API...");
       const res = await apiRequest('POST', '/api/auth/login', { nearWallet, nearAddress });
       const data = await res.json();
+      console.log("Login API response:", data);
       
       if (data.success) {
         setIsAuthenticated(true);
@@ -100,6 +102,10 @@ function App() {
           title: "Logged in successfully",
           description: `Welcome back, ${data.user.username}!`,
         });
+        
+        // Redirect to dashboard after successful login
+        console.log("Redirecting to dashboard...");
+        window.location.href = '/dashboard';
       } else {
         throw new Error('Login failed');
       }

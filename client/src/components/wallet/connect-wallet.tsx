@@ -32,10 +32,8 @@ const ConnectWallet = () => {
         // Pass wallet info to login function
         console.log("Attempting login with wallet:", walletInfo.walletId);
         await login(walletInfo.walletId, walletInfo.publicAddress);
-        toast({
-          title: "Connected",
-          description: `Successfully connected to ${walletInfo.walletId}`,
-        });
+        // No need for toast here since login function handles it
+        // The login function will also handle redirection to dashboard
       } else {
         console.error("Wallet connection returned null");
         toast({

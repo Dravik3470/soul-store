@@ -21,9 +21,9 @@ const Home: React.FC = () => {
       console.log("Home page: Wallet connection result:", walletInfo);
       
       if (walletInfo) {
+        // Login function handles redirection to dashboard
         console.log("Home page: Attempting login with wallet:", walletInfo.walletId);
         await login(walletInfo.walletId, walletInfo.publicAddress);
-        console.log("Home page: Login successful");
       } else {
         console.error("Home page: Failed to connect wallet");
       }
