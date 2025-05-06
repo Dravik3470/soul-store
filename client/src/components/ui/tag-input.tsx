@@ -138,7 +138,7 @@ export function TagInput({
           
           {/* Suggestions dropdown */}
           {suggestionsVisible && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto z-10 rounded-md border border-dark-100 bg-dark-200 shadow-lg">
+            <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto z-10 rounded-md border border-dark-100 bg-white">
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}

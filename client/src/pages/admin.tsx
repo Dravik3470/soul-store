@@ -223,7 +223,7 @@ const Admin: React.FC = () => {
                     <SelectTrigger className="w-[180px] bg-dark-100 border-dark-100">
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-dark-100 border-dark-100">
+                    <SelectContent className="border-dark-100">
                       <SelectItem value="all">All Content</SelectItem>
                       <SelectItem value="pending">Pending Review</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
