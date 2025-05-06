@@ -8,50 +8,6 @@ import { useAuth } from "@/context/auth-context";
 
 const ConnectWallet = () => {
   const { isAuthenticated, nearWallet, login, logout } = useAuth();
-  const { toast } = useToast();
-
-  const handleConnect = async () => {
-    try {
-      // Connect to NEAR wallet
-      console.log("Starting wallet connection...");
-      
-      // Check if connectNearWallet function is available
-      if (typeof connectNearWallet !== 'function') {
-        console.error("NEAR wallet connection function not found");
-        toast({
-          title: "Connection Error",
-          description: "Wallet connection method not available",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      const walletInfo = await connectNearWallet();
-      console.log("Wallet connection result:", walletInfo);
-      
-      if (walletInfo) {
-        // Pass wallet info to login function
-        console.log("Attempting login with wallet:", walletInfo.walletId);
-        await login(walletInfo.walletId, walletInfo.publicAddress);
-        // No need for toast here since login function handles it
-        // The login function will also handle redirection to dashboard
-      } else {
-        console.error("Wallet connection returned null");
-        toast({
-          title: "Connection failed",
-          description: "Unable to connect to NEAR wallet",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Wallet connection error:", error);
-      toast({
-        title: "Connection error",
-        description: "An error occurred while connecting to the wallet",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleDisconnect = async () => {
     await logout();
@@ -88,19 +44,6 @@ const ConnectWallet = () => {
       </div>
     );
   }
-
-  // Show connect button
-  return (
-    <div className="mt-auto">
-      <Button 
-        onClick={handleConnect}
-        className="w-full bg-gradient-to-r from-primary-500 to-secondary-400 hover:opacity-90 text-white"
-      >
-        <LogIn className="mr-2 h-4 w-4" />
-        Connect NEAR Wallet
-      </Button>
-    </div>
-  );
 };
 
 export default ConnectWallet;

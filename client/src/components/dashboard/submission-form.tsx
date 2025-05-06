@@ -196,7 +196,7 @@ const SubmissionForm: React.FC = () => {
             <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-all focus:ring-2 focus:ring-primary-400 focus:ring-offset-1 focus:ring-offset-dark-200"
+                className="w-full bg-primary-500 hover:bg-primary-600 text-black border-2 font-medium py-2 px-4 rounded-lg transition-all focus:ring-2 focus:ring-primary-400 focus:ring-offset-1 focus:ring-offset-dark-200"
                 disabled={submission.isPending || !isAuthenticated}
               >
                 {submission.isPending ? "Submitting..." : "Submit for Analysis"}

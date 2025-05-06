@@ -399,7 +399,8 @@ const Admin: React.FC = () => {
                             {!content.approved && !content.rejected && (
                               <>
                                 <Button
-                                  className="w-full bg-success hover:bg-success/90 text-white flex items-center justify-center"
+                                  variant="default"
+                                  className="w-full bg-success hover:bg-success/90 text-black flex items-center justify-center"
                                   onClick={() => approveContent.mutate(content.id)}
                                   disabled={approveContent.isPending}
                                 >

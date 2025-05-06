@@ -59,7 +59,7 @@ const Feed: React.FC = () => {
             <SelectTrigger className="w-40 bg-dark-200 border-dark-100">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="bg-dark-100 border-dark-100">
+            <SelectContent className="bg-dark-100 border border-dark-100 shadow-md z-50">
               <SelectItem value="all">All Categories</SelectItem>
               {categories && categories.map((category: string) => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
