@@ -1,8 +1,8 @@
+import { useState, useEffect } from "react";
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import NotFound from "@/pages/not-found";
@@ -12,26 +12,9 @@ import Feed from "@/pages/feed";
 import Leaderboard from "@/pages/leaderboard";
 import Profile from "@/pages/profile";
 import Admin from "@/pages/admin";
-import { useState, useEffect, createContext } from "react";
-import { apiRequest } from "./lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-
-interface AuthContextType {
-  isAuthenticated: boolean;
-  nearWallet: string | null;
-  login: (nearWallet: string, nearAddress: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isAdmin: boolean;
-}
-
-// Create a React context for auth state
-export const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  nearWallet: null,
-  login: async () => {},
-  logout: async () => {},
-  isAdmin: false,
-});
+import { AuthContext } from "@/context/auth-context";
 
 function Router() {
   return (
@@ -60,79 +43,71 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Check auth status when app loads
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch('/api/auth/status');
+        const res = await fetch("/api/auth/status");
         const data = await res.json();
         setIsAuthenticated(data.authenticated);
         setNearWallet(data.nearWallet || null);
-        
+
         if (data.authenticated) {
-          // Fetch user details to check if admin
-          const userRes = await fetch('/api/users/me');
+          const userRes = await fetch("/api/users/me");
           if (userRes.ok) {
             const userData = await userRes.json();
             setIsAdmin(userData.isAdmin);
           }
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error("Auth check failed:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    
     checkAuth();
   }, []);
-  
-  const login = async (nearWallet: string, nearAddress: string) => {
+
+  const login = async (walletId: string, address: string) => {
     try {
-      console.log("Sending login request to API...");
-      const res = await apiRequest('POST', '/api/auth/login', { nearWallet, nearAddress });
+      const res = await apiRequest("POST", "/api/auth/login", { nearWallet: walletId, nearAddress: address });
       const data = await res.json();
-      console.log("Login API response:", data);
-      
+
       if (data.success) {
         setIsAuthenticated(true);
         setNearWallet(data.user.nearWallet);
         setIsAdmin(data.user.isAdmin);
+
         toast({
           title: "Logged in successfully",
-          description: `Welcome back, ${data.user.username}!`,
+          description: `Welcome, ${data.user.username}`,
         });
-        
-        // Redirect to dashboard after successful login
-        console.log("Redirecting to dashboard...");
-        window.location.href = '/dashboard';
+
+        window.location.href = "/dashboard";
       } else {
-        throw new Error('Login failed');
+        throw new Error("Login failed");
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (err) {
+      console.error("Login error:", err);
       toast({
         title: "Login failed",
-        description: "Unable to login with NEAR wallet",
-        variant: "destructive"
+        description: "Could not login with NEAR wallet",
+        variant: "destructive",
       });
     }
   };
-  
+
   const logout = async () => {
     try {
-      await apiRequest('POST', '/api/auth/logout');
+      await apiRequest("POST", "/api/auth/logout");
       setIsAuthenticated(false);
       setNearWallet(null);
       setIsAdmin(false);
-      toast({
-        title: "Logged out successfully",
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
+      toast({ title: "Logged out successfully" });
+    } catch (err) {
+      console.error("Logout error:", err);
     }
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-dark-300">

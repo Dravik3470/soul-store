@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { AuthContext } from "@/App";
+import { useAuth } from "@/context/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { format, isToday, isYesterday } from "date-fns";
 
 const Profile: React.FC = () => {
-  const { isAuthenticated, nearWallet } = useContext(AuthContext);
+  const { isAuthenticated, nearWallet } = useAuth();
   const [_, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("tokens");
 

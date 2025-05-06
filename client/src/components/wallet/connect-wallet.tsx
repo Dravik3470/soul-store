@@ -1,12 +1,13 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, LogIn } from "lucide-react";
-import { AuthContext } from "@/App";
+
 import { connectNearWallet } from "@/lib/near";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth-context";
 
 const ConnectWallet = () => {
-  const { isAuthenticated, nearWallet, login, logout } = useContext(AuthContext);
+  const { isAuthenticated, nearWallet, login, logout } = useAuth();
   const { toast } = useToast();
 
   const handleConnect = async () => {

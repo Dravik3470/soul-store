@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Link, useLocation } from "wouter";
 import ConnectWallet from "@/components/wallet/connect-wallet";
-import { AuthContext } from "@/App";
+import { useAuth } from "@/context/auth-context";
 import {
   Home,
   ClipboardList,
@@ -14,7 +14,7 @@ import {
 
 const Sidebar = () => {
   const [location] = useLocation();
-  const { isAuthenticated, isAdmin } = useContext(AuthContext);
+  const { isAuthenticated, isAdmin } = useAuth();
 
   const navigationItems = [
     {

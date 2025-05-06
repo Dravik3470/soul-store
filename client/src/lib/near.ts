@@ -1,54 +1,67 @@
-// near.ts - Handles NEAR wallet integration
+import { connect, WalletConnection, keyStores } from 'near-api-js';
 
-// For a real implementation, we would use near-api-js
-// This is a simplified mock for demonstration
 export interface NearWalletInfo {
   walletId: string;
   publicAddress: string;
 }
 
-// Mock function to initialize NEAR wallet
-export function initNearWallet() {
+const nearConfig = {
+  networkId: 'testnet',
+  keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+  nodeUrl: 'https://rpc.testnet.near.org',
+  walletUrl: 'https://testnet.mynearwallet.com/',
+  helperUrl: 'https://helper.testnet.near.org',
+  headers: {},
+};
+
+console.log(import.meta.env.VITE_NEAR_NETWORK_ID);
+
+
+let wallet: WalletConnection;
+const CONTRACT_ID = 'guest-book.testnet'; 
+
+export async function initNearWallet() {
   console.log("Initializing NEAR wallet connection");
-  
-  // In a real implementation, this would set up event listeners
-  // for NEAR wallet connections and handle deep linking
-  
-  // For this demo, we'll expose a global function that simulates wallet connection
+  const near = await connect(nearConfig);
+  wallet = new WalletConnection(near, 'soul-scribe');
   window.connectNearWallet = connectNearWallet;
-  
-  // For debugging purposes, log if the function was properly assigned
-  console.log("NEAR wallet connection initialized: ", typeof window.connectNearWallet === 'function' ? 'Success' : 'Failed');
+  console.log("NEAR wallet initialized:", wallet.isSignedIn() ? "Signed In" : "Not Signed In");
 }
 
-// Function to simulate wallet connection
-// In a real app, this would use NEAR API to connect to wallet
 export async function connectNearWallet(): Promise<NearWalletInfo | null> {
   try {
-    // Simulate the connection process
-    console.log("Connecting to NEAR wallet...");
+    if (!wallet) {
+      console.warn("Wallet not initialized. Call initNearWallet first.");
+      return null;
+    }
+
+    if (!wallet.isSignedIn()) {
+      console.log("Redirecting to NEAR Wallet login...");
+      wallet.requestSignIn({
+        contractId: CONTRACT_ID,
+        successUrl: window.location.origin,
+        failureUrl: window.location.origin,
+        keyType: 'ed25519'
+      });
+      return null;
+    }
+
+    const accountId = wallet.getAccountId();
+    console.log("Account ID:", accountId);
     
-    // In a real implementation, this would redirect to NEAR wallet
-    // and handle the callback with account information
-    
-    // For demo, we'll always use the demo wallet for consistent testing
-    const wallet = { 
-      walletId: 'demo.near', 
-      publicAddress: '0x2191ef87e392377ec08e7c08eb105ef5448eced5' 
+    const publicKey = (await wallet.account().connection.signer.getPublicKey(accountId, nearConfig.networkId)).toString();
+
+    console.log("Connected to NEAR wallet:", accountId);
+    return {
+      walletId: accountId,
+      publicAddress: publicKey
     };
-    
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    console.log("Successfully connected to wallet:", wallet.walletId);
-    return wallet;
   } catch (error) {
     console.error("Error connecting to NEAR wallet:", error);
     return null;
   }
 }
 
-// Add TypeScript declaration for the global function
 declare global {
   interface Window {
     connectNearWallet: () => Promise<NearWalletInfo | null>;

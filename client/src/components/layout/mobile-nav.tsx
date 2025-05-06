@@ -1,18 +1,34 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { AuthContext } from "@/App";
-import { Menu, X, Home, ClipboardList, FileText, User, BarChart2, ShieldCheck, Pen } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import {
+  Menu,
+  X,
+  Home,
+  ClipboardList,
+  FileText,
+  User,
+  BarChart2,
+  ShieldCheck,
+  Pen,
+} from "lucide-react";
 
-const MobileNav = () => {
+interface NavItem {
+  name: string;
+  path: string;
+  icon: React.ReactNode;
+  requiresAuth?: boolean;
+  requiresAdmin?: boolean;
+}
+
+const MobileNav: React.FC = () => {
   const [location] = useLocation();
-  const { isAuthenticated, isAdmin } = useContext(AuthContext);
+  const { isAuthenticated, isAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  const navigationItems = [
+  const navigationItems: NavItem[] = [
     {
       name: "Home",
       path: "/",
@@ -40,12 +56,19 @@ const MobileNav = () => {
       icon: <User className="h-6 w-6" />,
       requiresAuth: true,
     },
+    {
+      name: "Admin Panel",
+      path: "/admin",
+      icon: <ShieldCheck className="h-6 w-6" />,
+      requiresAdmin: true,
+    },
   ];
 
-  // Filter items based on authentication status
-  const visibleItems = navigationItems.filter(
-    item => !item.requiresAuth || isAuthenticated
-  );
+  const visibleItems = navigationItems.filter((item) => {
+    if (item.requiresAdmin) return isAdmin;
+    if (item.requiresAuth) return isAuthenticated;
+    return true;
+  });
 
   return (
     <>
@@ -58,9 +81,8 @@ const MobileNav = () => {
             </div>
             <h1 className="text-lg font-bold text-light-100">SoulScribe</h1>
           </div>
-          
-          <button 
-            className="text-light-100 p-1" 
+          <button
+            className="text-light-100 p-1"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -68,41 +90,23 @@ const MobileNav = () => {
           </button>
         </div>
       </div>
-      
-      {/* Full-screen menu when open */}
+
+      {/* Full-screen overlay menu */}
       {menuOpen && (
         <div className="fixed inset-0 bg-dark-300 z-40 pt-16 md:hidden">
           <div className="p-4">
             <nav className="space-y-4">
-              {navigationItems.map((item) => {
-                // Skip if item requires auth and user is not authenticated
-                if (item.requiresAuth && !isAuthenticated) return null;
-                // Skip if item requires admin and user is not admin
-                if (item.requiresAdmin && !isAdmin) return null;
-                
-                return (
-                  <Link 
-                    key={item.path}
-                    href={item.path}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center p-4 text-xl text-light-100"
-                  >
-                    {item.icon}
-                    <span className="ml-3">{item.name}</span>
-                  </Link>
-                );
-              })}
-              
-              {isAdmin && (
-                <Link 
-                  href="/admin"
+              {visibleItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center p-4 text-xl text-light-100"
                 >
-                  <ShieldCheck className="h-6 w-6" />
-                  <span className="ml-3">Admin Panel</span>
+                  {item.icon}
+                  <span className="ml-3">{item.name}</span>
                 </Link>
-              )}
+              ))}
             </nav>
           </div>
         </div>
@@ -114,7 +118,7 @@ const MobileNav = () => {
           {visibleItems.slice(0, 5).map((item) => {
             const isActive = location === item.path;
             return (
-              <Link 
+              <Link
                 key={item.path}
                 href={item.path}
                 className={`flex flex-col items-center py-2 px-3 ${

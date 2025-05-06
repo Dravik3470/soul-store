@@ -1,13 +1,13 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "wouter";
-import { AuthContext } from "@/App";
+import { useAuth } from "@/context/auth-context";
 import SubmissionForm from "@/components/dashboard/submission-form";
 import AIAnalysis from "@/components/dashboard/ai-analysis";
 import RecentSubmissions from "@/components/dashboard/recent-submissions";
 import SBTCollection from "@/components/dashboard/sbt-collection";
 
 const Dashboard: React.FC = () => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated } = useAuth();
   const [_, navigate] = useLocation();
 
   // Redirect if not authenticated

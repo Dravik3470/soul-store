@@ -89,7 +89,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      res.status(400).json({ message: "Invalid request" });
+      console.error("Login error:", error);
+      res.status(400).json({ message: "Invalid request", error: error });
     }
   });
   

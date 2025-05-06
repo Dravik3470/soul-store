@@ -1,12 +1,12 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { AuthContext } from "@/App";
+import { useAuth } from "@/context/auth-context";
 import { Zap, FileText, Award, Shield } from "lucide-react";
 
 const Home: React.FC = () => {
-  const { isAuthenticated, login } = useContext(AuthContext);
-
+  const { isAuthenticated, login } = useAuth();
+  
   const handleConnectWallet = async () => {
     try {
       // Connect to NEAR wallet
