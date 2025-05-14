@@ -9,6 +9,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format, isToday, isYesterday } from "date-fns";
+import { initNearWallet } from "@/lib/near";
+
 import { 
   Shield, 
   Clock, 
@@ -28,6 +30,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { mintSBT } from "@/lib/near"; 
 
 const Admin: React.FC = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -40,6 +43,7 @@ const Admin: React.FC = () => {
 
   // Redirect if not authenticated or not an admin
   useEffect(() => {
+    initNearWallet();
     if (!isAuthenticated || !isAdmin) {
       navigate("/");
     }
@@ -61,8 +65,45 @@ const Admin: React.FC = () => {
 
   // Mutation for approving content
   const approveContent = useMutation({
-    mutationFn: async (contentId: number) => {
-      const response = await apiRequest("POST", `/api/admin/content/${contentId}/approve`);
+    mutationFn: async (content: any) => {
+      console.log(content);
+
+      
+      const contentId = content.id;
+
+      const categories = content.categories || [];
+      let type: string = ""
+      let name: string = ""
+      let description: string = "";
+
+      if (categories.includes("tutorial")) {
+        type = "Tutorial Master";
+        name = "Knowledge Sharing";
+        description = "Awarded for creating educational content";
+      } else if (categories.includes("review")) {
+        type = "Insight Provider";
+        name = "Critical Analysis";
+        description = "Awarded for thoughtful reviews";
+      } else if (categories.includes("analysis")) {
+        type = "Analysis Expert";
+        name = "Deep Insights";
+        description = "Awarded for detailed analytical content";
+      }
+
+      const tokenId = await mintSBT(content.nearWallet, `${type} - ${name}`);
+
+      const payload = {
+        type: type,
+        name: name,
+        description: description,
+        tokenId: tokenId,
+        contentId: contentId,
+        categories: categories,
+        createdAt: new Date().toISOString(),
+        imageUrl: `https://source.boringavatars.com/beam/120/${type}?colors=5F4B8B,00C2CB,FF7E5F,121212,F8F9FA`
+      }
+
+      const response = await apiRequest("POST", `/api/admin/content/${content.id}/approve`, payload);
       return response.json();
     },
     onSuccess: () => {
@@ -73,6 +114,8 @@ const Admin: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/content'] });
     },
     onError: (error) => {
+      console.log(error);
+      
       toast({
         title: "Approval failed",
         description: error instanceof Error ? error.message : "Please try again",
@@ -401,7 +444,7 @@ const Admin: React.FC = () => {
                                 <Button
                                   variant="default"
                                   className="w-full bg-success hover:bg-success/90 text-black flex items-center justify-center"
-                                  onClick={() => approveContent.mutate(content.id)}
+                                  onClick={() => approveContent.mutate(content)}
                                   disabled={approveContent.isPending}
                                 >
                                   <CheckCircle className="mr-2 h-4 w-4" />

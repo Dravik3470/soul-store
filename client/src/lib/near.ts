@@ -1,9 +1,11 @@
-import { connect, WalletConnection, keyStores } from 'near-api-js';
+import { connect, WalletConnection, keyStores, Contract } from 'near-api-js';
 
 export interface NearWalletInfo {
   walletId: string;
   publicAddress: string;
 }
+
+const CONTRACT_ID = 'ito-sbt-token.testnet'; // Your deployed contract ID
 
 const nearConfig = {
   networkId: 'testnet',
@@ -11,55 +13,78 @@ const nearConfig = {
   nodeUrl: 'https://rpc.testnet.near.org',
   walletUrl: 'https://testnet.mynearwallet.com/',
   helperUrl: 'https://helper.testnet.near.org',
+  contractName: CONTRACT_ID,
   headers: {},
 };
 
-console.log(import.meta.env.VITE_NEAR_NETWORK_ID);
-
-
 let wallet: WalletConnection;
-const CONTRACT_ID = 'guest-book.testnet'; 
+let contract: Contract;
 
 export async function initNearWallet() {
-  console.log("Initializing NEAR wallet connection");
   const near = await connect(nearConfig);
   wallet = new WalletConnection(near, 'soul-scribe');
+
+  if (wallet.isSignedIn()) {
+    const account = wallet.account();
+    contract = new Contract(account, CONTRACT_ID, {
+      viewMethods: ['get_tokens'],
+      changeMethods: ['mint'],
+      useLocalViewExecution: true,
+    });
+  }
+
   window.connectNearWallet = connectNearWallet;
-  console.log("NEAR wallet initialized:", wallet.isSignedIn() ? "Signed In" : "Not Signed In");
 }
 
 export async function connectNearWallet(): Promise<NearWalletInfo | null> {
-  try {
-    if (!wallet) {
-      console.warn("Wallet not initialized. Call initNearWallet first.");
-      return null;
-    }
-
-    if (!wallet.isSignedIn()) {
-      console.log("Redirecting to NEAR Wallet login...");
-      wallet.requestSignIn({
-        contractId: CONTRACT_ID,
-        successUrl: window.location.origin,
-        failureUrl: window.location.origin,
-        keyType: 'ed25519'
-      });
-      return null;
-    }
-
-    const accountId = wallet.getAccountId();
-    console.log("Account ID:", accountId);
-    
-    const publicKey = (await wallet.account().connection.signer.getPublicKey(accountId, nearConfig.networkId)).toString();
-
-    console.log("Connected to NEAR wallet:", accountId);
-    return {
-      walletId: accountId,
-      publicAddress: publicKey
-    };
-  } catch (error) {
-    console.error("Error connecting to NEAR wallet:", error);
+  if (!wallet) {
+    console.warn("Wallet not initialized. Call initNearWallet first.");
     return null;
   }
+
+  if (!wallet.isSignedIn()) {
+    wallet.requestSignIn({
+      contractId: CONTRACT_ID,
+      successUrl: window.location.origin,
+      failureUrl: window.location.origin,
+      keyType: 'ed25519',
+    });
+    return null;
+  }
+
+  const accountId = wallet.getAccountId();
+  const publicKey = (await wallet.account().connection.signer.getPublicKey(accountId, nearConfig.networkId)).toString();
+
+  return {
+    walletId: accountId,
+    publicAddress: publicKey,
+  };
+}
+
+export function isSignedIn(): boolean {
+  return wallet?.isSignedIn() || false;
+}
+
+export function logoutNearWallet() {
+  wallet?.signOut();
+  window.location.reload();
+}
+
+export async function mintSBT(accountId: string, metadata: string) {
+  if (!contract) throw new Error("Contract is not initialized. Did you call initNearWallet()?");
+  if (!wallet || !wallet.isSignedIn()) throw new Error("Wallet is not signed in");
+  
+  const tokenId = await (contract as any).mint({
+    args: { accountId, metadata }
+  });
+
+  return tokenId;
+}
+
+export async function getUserTokens(accountId: string) {
+  if (!contract) throw new Error("Contract not initialized.");
+
+  return await (contract as any).get_tokens({ accountId });
 }
 
 declare global {

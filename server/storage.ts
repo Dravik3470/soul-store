@@ -61,10 +61,34 @@ export class DbStorage {
     return await db.select().from(content).where(eq(content.userId, userId));
   }
 
-  async getAllContents(limit = 10, offset = 0): Promise<Content[]> {
+  // async getAllContents(limit = 10, offset = 0): Promise<Content[]> {
+  //   return await db
+  //     .select()
+  //     .from(content)
+  //     .orderBy(content.createdAt)
+  //     .limit(limit)
+  //     .offset(offset);
+  // }
+
+  async getAllContents(limit = 10, offset = 0): Promise<(any)[]> {
     return await db
-      .select()
+      .select({
+        id: content.id,
+        userId: content.userId,
+        text: content.text,
+        link: content.link,
+        imageUrl: content.imageUrl,
+        categories: content.categories,
+        createdAt: content.createdAt,
+        aiAnalysis: content.aiAnalysis,
+        approved: content.approved,
+        rejected: content.rejected,
+        tokenIssued: content.tokenIssued,
+        tokenId: content.tokenId,
+        nearWallet: users.nearWallet,
+      })
       .from(content)
+      .innerJoin(users, eq(content.userId, users.id))
       .orderBy(content.createdAt)
       .limit(limit)
       .offset(offset);

@@ -143,24 +143,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the content with analysis
       const updatedContent = await storage.updateContentAnalysis(newContent.id, analysis);
       
-      // If analysis approves it automatically, issue a token
-      if (analysis.approved) {
-        await storage.approveContent(newContent.id);
+      // // If analysis approves it automatically, issue a token
+      // if (analysis.approved) {
+      //   await storage.approveContent(newContent.id);
         
-        // Generate token metadata
-        const tokenMeta = generateSBTMetadata(updatedContent);
+      //   // Generate token metadata
+      //   const tokenMeta = generateSBTMetadata(updatedContent);
         
-        // Create a soulbound token
-        const token = await storage.createSoulboundToken({
-          userId,
-          contentId: newContent.id,
-          tokenId: `${Date.now()}-${userId}-${Math.floor(Math.random() * 10000)}`,
-          tokenType: tokenMeta.type,
-          name: tokenMeta.name,
-          description: tokenMeta.description,
-          metadata: tokenMeta
-        });
-      }
+      //   // Create a soulbound token
+      //   const token = await storage.createSoulboundToken({
+      //     userId,
+      //     contentId: newContent.id,
+      //     tokenId: `${Date.now()}-${userId}-${Math.floor(Math.random() * 10000)}`,
+      //     tokenType: tokenMeta.type,
+      //     name: tokenMeta.name,
+      //     description: tokenMeta.description,
+      //     metadata: tokenMeta
+      //   });
+      // }
       
       res.status(201).json(updatedContent);
     } catch (error) {
@@ -235,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Approve content
-  app.post("/api/admin/content/:id/approve", ensureAdmin, async (req, res) => {
+  app.post("/api/admin/content/:id/approve", ensureAdmin, async (req, res) => {    
     const id = parseInt(req.params.id);
     
     try {
@@ -249,13 +249,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If not already tokenized, create a token
       if (!updatedContent.tokenIssued) {
         // Generate token metadata
-        const tokenMeta = generateSBTMetadata(updatedContent);
+        const tokenMeta = req.body;
         
         // Create a soulbound token
         const token = await storage.createSoulboundToken({
           userId: updatedContent.userId,
           contentId: updatedContent.id,
-          tokenId: `${Date.now()}-${updatedContent.userId}-${Math.floor(Math.random() * 10000)}`,
+          tokenId: tokenMeta.tokenId,
           tokenType: tokenMeta.type,
           name: tokenMeta.name,
           description: tokenMeta.description,
