@@ -1,22 +1,29 @@
-FROM node:16
+FROM node:20-alpine
 
-# Set the working directory
+# Install PostgreSQL client
+RUN apk add --no-cache postgresql-client
+
+# Create app directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+# Install app dependencies
+COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application code
+# Copy app source
 COPY . .
 
-# Build the client application
-RUN npm run build --prefix client
+# Make entrypoint script executable
+RUN chmod +x ./docker-entrypoint.sh
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Build the application
+RUN npm run build
 
-# Start the server
-CMD ["node", "server/index.js"]
+# Expose port
+EXPOSE 8080
+
+# Use entrypoint script to check for database and run migrations before starting
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
+# Start the application
+CMD ["npm", "run", "start"]
