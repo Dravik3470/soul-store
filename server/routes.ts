@@ -9,7 +9,7 @@ import {
   contentCategories,
   type AIAnalysis
 } from "@shared/schema";
-import { analyzeContent, generateSBTMetadata } from "./nlp";
+import { analyzeContent } from "./nlp";
 
 // Session type for authentication
 declare module "express-session" {

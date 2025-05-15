@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: product_data_insights
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5433"
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      VITE_DATABASE_URL: postgres://user:password@db:5433/product_data_insights
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+volumes:
+  db_data:

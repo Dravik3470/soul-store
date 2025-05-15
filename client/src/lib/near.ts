@@ -5,7 +5,7 @@ export interface NearWalletInfo {
   publicAddress: string;
 }
 
-const CONTRACT_ID = 'ito-sbt-token.testnet'; // Your deployed contract ID
+const CONTRACT_ID = 'ito-sbt-token.testnet';
 
 const nearConfig = {
   networkId: 'testnet',
